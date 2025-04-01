@@ -1,0 +1,13 @@
+#transversal
+
+hivtransversal <- WDI(country = 'all',
+                    indicator = 'SH.HIV.INCD',
+                    start = 2023, end = 2023)
+#temporal
+
+hivtemporal <- WDI(country = 'BR',
+                  indicator = 'SH.HIV.INCD')
+
+# DADOS EM PAINEL hiv
+dadosempainelhiv <- WDI(country = 'all',
+                indicator = 'SH.HIV.INCD')
