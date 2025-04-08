@@ -1,0 +1,183 @@
+# API (PORTA/FORMA DE ACESSO REMOTO)
+# ACESSAMOS OS DADOS DO BANCO MUNDIAL (WORLD BANK)
+# WORLD DEVELOPMENT INDICATORS (WDI)
+# INDICADORES DE DESENVOLVIMENTO MUNDIAL
+
+# PIB (PRODUTO INTERNO BRUTO)
+library(WDI) # CARREGAR BIBLIOTECA/PACOTE
+
+options(scipen = 999) # REMOVER A NOT. CIENT.
+# DADOS EM PAINEL
+dadospib <- WDI(country = 'all',
+                indicator = 'NY.GDP.MKTP.CD')
+
+paises <- c('BR', 'US')
+
+dadospibbrus <- WDI(country = paises,
+                    indicator = 'NY.GDP.MKTP.CD')
+
+# CORTE TRANSVERSAL
+dadospib2023 <- WDI(country = 'all',
+                    indicator = 'NY.GDP.MKTP.CD',
+                    start = 2023, end = 2023)
+
+# SÉRIE TEMPORAL
+dadospibbr <- WDI(country = 'BR',
+                  indicator = 'NY.GDP.MKTP.CD')
+
+#--------------------------------------------------------------------------#
+
+                                #graficos#
+
+
+# BIBLIOTECA ggplot2 (tidyverse)
+# install.packages('tidyverse')
+library(tidyverse)
+
+## DADOS EMM PAINEL
+
+grafpainel <- ggplot(dadospib, 
+                     mapping = aes(y= NY.GDP.MKTP.CD, x = year)) +
+  geom_point()
+
+print(grafpainel)
+
+# CORTE TRANSVERAL
+
+grafcorte <- ggplot(dadospib2023,
+                    mapping = aes(y = NY.GDP.MKTP.CD,
+                                  x = year)) +
+  geom_point()
+
+print(grafcorte)
+
+# SÉRIE TEMPORAL
+
+grafserie <- ggplot(dadospibbr,
+                    mapping = aes(y = NY.GDP.MKTP.CD,
+                                  x = year)) +
+  geom_line()
+
+print(grafserie)
+
+
+#--------------------------------------------------------------------------#
+                            
+                             #dadospib painel#
+
+
+# Instale os pacotes se ainda não tiver
+# install.packages("WDI")
+# install.packages("ggplot2")
+# install.packages("dplyr")
+
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Coleta dos dados
+dadospib <- WDI(country = "all", indicator = "NY.GDP.MKTP.CD")
+
+# Gráfico com personalizações
+grafpainel <- ggplot(data = dadospib, aes(x = year, y = NY.GDP.MKTP.CD)) +
+  geom_point(color = "#95a5a6", alpha = 0.4) +  # pontos gerais em cinza claro
+  geom_point(data = filter(dadospib, country == "Brazil"),
+             aes(x = year, y = NY.GDP.MKTP.CD),
+             color = "red", size = 2) +  # pontos do Brasil em vermelho
+  labs(title = "Evolução do PIB Mundial com Destaque para o Brasil",
+       x = "Ano",
+       y = "PIB") +
+  theme_minimal(base_family = "Helvetica") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text = element_text(color = "#2c3e50"),
+    legend.position = "none"  # remove a legenda
+  )
+
+# Exibe o gráfico
+grafpainel
+
+#--------------------------------------------------------------------------#
+
+                        #dadospib2023 transversal#
+
+# Carregando pacotes
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Coletando dados de 2023
+dadospib2023 <- WDI(country = 'all',
+                    indicator = 'NY.GDP.MKTP.CD',
+                    start = 2023, end = 2023)
+
+# Filtrando países com PIB disponível
+dadospib2023 <- dadospib2023 %>% filter(!is.na(NY.GDP.MKTP.CD))
+
+# Adiciona uma variável para destacar o Brasil
+dadospib2023 <- dadospib2023 %>%
+  mutate(cor = ifelse(country == "Brazil", "Brasil", "Outros"))
+
+# Ordena os países pelo PIB para visualização mais limpa
+dadospib2023 <- dadospib2023 %>%
+  arrange(desc(NY.GDP.MKTP.CD)) %>%
+  mutate(country = factor(country, levels = unique(country)))
+
+# Gráfico com barras e destaque no Brasil
+grafcorte <- ggplot(dadospib2023, aes(x = country, y = NY.GDP.MKTP.CD, fill = cor)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("Brasil" = "red", "Outros" = "#95a5a6")) +
+  labs(
+    title = "PIB dos Países em 2023 com Destaque para o Brasil",
+    x = "País",
+    y = "PIB"
+  ) +
+  theme_minimal(base_family = "Helvetica") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text.x = element_blank(),  # oculta os nomes dos países para não poluir
+    axis.text.y = element_text(color = "#2c3e50"),
+    legend.position = "none"        # remove a legenda
+  )
+
+# Exibir o gráfico
+print(grafcorte)
+
+
+#--------------------------------------------------------------------------#
+                 
+                          #dadospibbr temporal#
+
+
+# Carregar pacotes
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Coletar dados do PIB do Brasil
+dadospibbr <- WDI(country = 'BR',
+                  indicator = 'NY.GDP.MKTP.CD')
+
+# Gráfico de série temporal com personalizações
+grafserie <- ggplot(dadospibbr, aes(x = year, y = NY.GDP.MKTP.CD)) +
+  geom_line(color = "#2c3e50", size = 1) +  # linha moderna em azul escuro
+  geom_point(color = "red", size = 2) +    # pontos do Brasil em vermelho
+  labs(
+    title = "Evolução do PIB do Brasil",
+    x = "Ano",
+    y = "PIB"
+  ) +
+  theme_minimal(base_family = "Helvetica") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text = element_text(color = "#2c3e50"),
+    legend.position = "none"  # legenda desnecessária
+  )
+
+# Exibir o gráfico
+print(grafserie)
+
+
