@@ -1,0 +1,148 @@
+MINHA VARIÁVEL COM OS DADOS SOBRE Urban population(SP.URB.TOTL) E COM OS GRAFICOS DE ACORDO COM O GPT
+
+
+
+
+#transversal
+
+Urbanpopulationtransversal <- WDI(country = 'all',
+                      indicator = 'SP.URB.TOTL',
+                      start = 2023, end = 2023)
+#temporal
+
+Urbanpopulationteporal <- WDI(country = 'BR',
+                   indicator = 'SP.URB.TOTL')
+
+# DADOS EM PAINEL
+Urbanpopulationpainel <- WDI(country = 'all',
+                        indicator = 'SP.URB.TOTL')
+
+#------------------------------------------------------------------------------#
+
+                       #Urbanpopulationtransversal#
+
+# Carregar pacotes
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Baixar os dados da população urbana total em 2023
+Urbanpopulationtransversal <- WDI(country = 'all',
+                                  indicator = 'SP.URB.TOTL',
+                                  start = 2023, end = 2023)
+
+# Remover dados ausentes
+Urbanpopulationtransversal <- Urbanpopulationtransversal %>%
+  filter(!is.na(SP.URB.TOTL))
+
+# Criar variável de destaque para o Brasil
+Urbanpopulationtransversal <- Urbanpopulationtransversal %>%
+  mutate(destacar = ifelse(country == "Brazil", "Brasil", "Outros"))
+
+# Ordenar os países pela população urbana
+Urbanpopulationtransversal <- Urbanpopulationtransversal %>%
+  arrange(desc(SP.URB.TOTL)) %>%
+  mutate(country = factor(country, levels = unique(country)))
+
+# Criar gráfico
+grafurb <- ggplot(Urbanpopulationtransversal, aes(x = country, y = SP.URB.TOTL, fill = destacar)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("Brasil" = "red", "Outros" = "#95a5a6")) +
+  labs(
+    title = "População Urbana Total em 2023",
+    x = "País",
+    y = "População Urbana"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text.x = element_blank(),  # Oculta nomes dos países (para visual não poluído)
+    axis.text.y = element_text(color = "#2c3e50"),
+    legend.position = "none"
+  )
+
+# Exibir gráfico
+print(grafurb)
+
+
+#------------------------------------------------------------------------------#
+                
+                           #Urbanpopulationteporal#
+
+
+# Carregar pacotes
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Coletar dados da população urbana do Brasil ao longo do tempo
+Urbanpopulationteporal <- WDI(country = 'BR',
+                              indicator = 'SP.URB.TOTL')
+
+# Remover valores ausentes (se houver)
+Urbanpopulationteporal <- Urbanpopulationteporal %>%
+  filter(!is.na(SP.URB.TOTL))
+
+# Criar gráfico
+grafurbtemporal <- ggplot(Urbanpopulationteporal, aes(x = year, y = SP.URB.TOTL)) +
+  geom_line(color = "red", size = 1.2) +  # Linha vermelha mais espessa
+  geom_point(color = "darkred", size = 2) +  # Pontos para cada ano
+  labs(
+    title = "Evolução da População Urbana no Brasil",
+    x = "Ano",
+    y = "População Urbana"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text = element_text(color = "#2c3e50"),
+    legend.position = "none"
+  )
+
+# Exibir gráfico
+print(grafurbtemporal)
+
+
+#------------------------------------------------------------------------------#[
+
+                           #Urbanpopulationpainel#
+    
+
+# Carregar pacotes
+library(WDI)
+library(ggplot2)
+library(dplyr)
+
+# Baixar dados da população urbana para todos os países (série temporal)
+Urbanpopulationpainel <- WDI(country = 'all',
+                             indicator = 'SP.URB.TOTL')
+
+# Remover valores ausentes
+Urbanpopulationpainel <- Urbanpopulationpainel %>%
+  filter(!is.na(SP.URB.TOTL))
+
+# Adicionar variável para destaque do Brasil
+Urbanpopulationpainel <- Urbanpopulationpainel %>%
+  mutate(destacar = ifelse(country == "Brazil", "Brasil", "Outros"))
+
+# Criar gráfico com linhas por país, Brasil destacado
+grafpainelurb <- ggplot(Urbanpopulationpainel, aes(x = year, y = SP.URB.TOTL, group = country)) +
+  geom_line(aes(color = destacar), alpha = 0.4) +
+  scale_color_manual(values = c("Brasil" = "red", "Outros" = "gray70")) +
+  labs(
+    title = "Evolução da População Urbana no Mundo (com destaque para o Brasil)",
+    x = "Ano",
+    y = "População Urbana"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", color = "#2c3e50"),
+    axis.title = element_text(size = 12, color = "#34495e"),
+    axis.text = element_text(color = "#2c3e50"),
+    legend.position = "none"
+  )
+
+# Exibir gráfico
+print(grafpainelurb)
