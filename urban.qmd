@@ -1,0 +1,116 @@
+---
+title: "Miguel"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(WDI)
+
+options(scipen = 999) # REMOVER A NOT. CIENT.
+# DADOS EM PAINEL
+Urbanpopulationpainel <- WDI(country = 'all',
+                        indicator = 'SP.URB.TOTL')
+
+#transversal
+Urbanpopulationtransversal <- WDI(country = 'all',
+                      indicator = 'SP.URB.TOTL',
+                      start = 2023, end = 2023)
+
+#temporal
+Urbanpopulationteporal <- WDI(country = 'BR',
+                   indicator = 'SP.URB.TOTL')
+
+```
+
+## VARIÁVEL
+
+Falar sobre a variável que vocês escolheram. Qual é a fonte? Medida?
+
+\## GRÁFICO DE DADOS EM PAINEL
+
+Falar sobre o gráfico de dados em painel.
+
+```{r}
+#| label: graficodadosempainel
+#| warning: false
+#| echo: false
+
+ggplot(Urbanpopulationpainel, aes(x = year, y = SP.URB.TOTL)) +
+  geom_point(color = "steelblue", size = 3, alpha = 0.7) +
+  geom_line(color = "steelblue", size = 1) +
+  labs(
+    title = "População Urbana ao Longo dos Anos",
+    subtitle = "Indicador: SP.URB.TOTL",
+    x = "Ano",
+    y = "População Urbana",
+    caption = "Fonte: Urbanpopulationpainel"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(size = 8, face = "italic"),
+    axis.title.x = element_text(margin = margin(t = 10)),
+    axis.title.y = element_text(margin = margin(r = 10))
+  )
+
+```
+
+## GRÁFICO DE DADOS DE CORTE TRANSVERSAL
+
+Falar sobre o gráfico de dados de corte transversal.
+
+```{r}
+#| label: graficocortetransversal 
+#| warning: false 
+#| echo: false  
+
+ggplot(Urbanpopulationtransversal, aes(x = year, y = SP.URB.TOTL)) +
+  geom_point(
+    aes(color = ifelse(country == "BR", "br", "Outro")),
+    size = 3,
+    alpha = 0.7
+  ) +
+  geom_line(color = "steelblue", size = 1) +
+  scale_color_manual(
+    values = c("BR" = "red", "Outro" = "black")
+  ) +
+  labs(
+    title = "População Urbana ao Longo dos Anos",
+    subtitle = "Brasil em destaque",
+    x = "Ano",
+    y = "População Urbana",
+    color = "País",
+    caption = "Fonte: Urbanpopulationtransversal"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(size = 8, face = "italic"),
+    axis.title.x = element_text(margin = margin(t = 10)),
+    axis.title.y = element_text(margin = margin(r = 10)),
+    legend.position = "bottom"
+  )
+
+```
+
+## GRÁFICO DE DADOS DE SÉRIE TEMPORAL
+
+Falar sobre o gráfico de dados de série temporal.
+
+```{r}
+#| label: graficoserietemporal 
+#| warning: false  
+#| echo: false    
+
+ggplot(Urbanpopulationteporal,
+       mapping = aes(y = SP.URB.TOTL,
+                                  x = year)) +
+  geom_line()
+```
