@@ -1,0 +1,103 @@
+---
+title: "Miguel - População Urbana"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(WDI)
+
+options(scipen = 999) # Remover notação científica
+
+# DADOS EM PAINEL
+Urbanpopulationpainel <- WDI(country = 'all',
+                              indicator = 'SP.URB.TOTL')
+
+# DADOS TRANSVERSAIS (2023)
+Urbanpopulationtransversal <- WDI(country = 'all',
+                                   indicator = 'SP.URB.TOTL',
+                                   start = 2023, end = 2023)
+
+# SÉRIE TEMPORAL (BRASIL)
+Urbanpopulationtemporal <- WDI(country = 'BR',
+                                indicator = 'SP.URB.TOTL')
+```
+
+## Variável
+
+A variável escolhida foi a **população urbana total** (`SP.URB.TOTL`), fonte Banco Mundial (WDI). Medida em número absoluto de habitantes urbanos.
+
+## Gráfico de Dados em Painel
+
+Este gráfico apresenta a evolução da **população urbana** ao longo do tempo para o **Brasil** e para os **demais países** disponíveis na base do Banco Mundial.\
+
+Cada linha representa a trajetória de um país entre os anos disponíveis, permitindo observar tendências de crescimento ou estagnação populacional urbana.
+
+```{r}
+#| label: grafico-painel
+#| warning: false
+#| echo: false
+
+Urbanpopulationpainel %>%
+  filter(!is.na(SP.URB.TOTL)) %>%
+  mutate(Brasil = if_else(iso2c == "BR", "Brasil", "Outros")) %>%
+  ggplot(aes(x = year, y = SP.URB.TOTL, group = country, color = Brasil)) +
+  geom_line(size = 0.8, alpha = 0.8) +
+  scale_color_manual(values = c("Brasil" = "red", "Outros" = "black")) +
+  labs(
+    title = "Evolução da População Urbana - Brasil vs Outros Países",
+    x = "Ano",
+    y = "População Urbana",
+    color = "Legenda"
+  ) +
+  theme_minimal()
+```
+
+## Gráfico de Dados Transversais (2023)
+
+Este gráfico mostra a **população urbana** de diferentes países **apenas no ano de 2023**, Permite comparar diretamente o tamanho da população urbana brasileira em relação aos outros países em 2023.
+
+```{r}
+#| label: grafico-transversal
+#| warning: false
+#| echo: false
+
+Urbanpopulationtransversal %>%
+  filter(!is.na(SP.URB.TOTL)) %>%
+  mutate(Brasil = if_else(iso2c == "BR", "Brasil", "Outros")) %>%
+  ggplot(aes(x = reorder(country, -SP.URB.TOTL), y = SP.URB.TOTL, fill = Brasil)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = c("Brasil" = "red", "Outros" = "black")) +
+  labs(
+    title = "População Urbana em 2023 - Brasil vs Outros Países",
+    x = "País",
+    y = "População Urbana (2023)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+```
+
+## Gráfico de Série Temporal (Brasil)
+
+Este gráfico foca **exclusivamente no Brasil**, mostrando a evolução da **população urbana** brasileira ao longo dos anos.
+
+```{r}
+#| label: grafico-serie-temporal
+#| warning: false
+#| echo: false
+
+Urbanpopulationtemporal %>%
+  ggplot(aes(x = year, y = SP.URB.TOTL)) +
+  geom_line(color = "red", size = 1) +
+  geom_point(color = "red", size = 2) +
+  labs(
+    title = "Evolução da População Urbana no Brasil",
+    x = "Ano",
+    y = "População Urbana"
+  ) +
+  theme_minimal()
+```
