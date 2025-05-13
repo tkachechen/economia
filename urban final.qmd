@@ -1,0 +1,133 @@
+---
+title: "Miguel - População Urbana"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(WDI)
+
+options(scipen = 999) # Remover notação científica
+
+# DADOS EM PAINEL
+Urbanpopulationpainel <- WDI(country = 'all',
+                              indicator = 'SP.URB.TOTL')
+
+# DADOS TRANSVERSAIS (2023)
+Urbanpopulationtransversal <- WDI(country = 'all',
+                                   indicator = 'SP.URB.TOTL',
+                                   start = 2023, end = 2023)
+
+# SÉRIE TEMPORAL (BRASIL)
+Urbanpopulationtemporal <- WDI(country = 'BR',
+                                indicator = 'SP.URB.TOTL')
+```
+
+## Variável
+
+A variável escolhida foi a **população urbana total** (`SP.URB.TOTL`), fonte Banco Mundial (WDI). Medida em número absoluto de habitantes urbanos.
+
+## Gráfico de Dados em Painel
+
+Este gráfico apresenta a evolução da **população urbana** ao longo do tempo para o **Brasil** e para os **demais países** disponíveis na base do Banco Mundial.
+
+Cada linha representa a trajetória de um país entre os anos disponíveis, permitindo observar tendências de crescimento ou estagnação populacional urbana, ainda está atrás de China (aprox. 900 mi) e Índia (aprox. 500 mi), mas à frente dos EUA (aprox. 270 mi) quando se considera apenas a parcela urbana.
+
+```{r}
+#| label: grafico-painel
+#| warning: false
+#| echo: false
+
+Urbanpopulationpainel %>%
+  filter(!is.na(SP.URB.TOTL)) %>%
+  mutate(
+    Brasil = if_else(iso2c == "BR", "Brasil", 
+                     if_else(iso2c == "CN", "China", 
+                             if_else(iso2c == "US", "EUA", "Outros")))
+  ) %>%
+  ggplot(aes(x = year, y = SP.URB.TOTL, group = country, color = Brasil)) +
+  geom_line(size = 0.8, alpha = 0.8) +
+  scale_color_manual(values = c("Brasil" = "red", "China" = "green", "EUA" = "green", "Outros" = "black")) +
+  labs(
+    title = "Evolução da População Urbana - Brasil vs Outros Países",
+    x = "Ano",
+    y = "População Urbana",
+    color = "Legenda"
+  ) +
+  theme_minimal()
+```
+
+## Gráfico de Dados Transversais (2023)
+
+Este gráfico mostra a **população urbana** de diferentes países **apenas no ano de 2023**, Permite comparar diretamente o tamanho da população urbana brasileira em relação aos outros países em 2023, crescimento contínuo desde 70, passando de \~40 mi para \~170 mi em 2023, mostrando tanto urbanização acelerada nos anos 70-90 quanto um ritmo mais moderado na última década.
+
+```{r}
+#| label: grafico-transversal
+#| warning: false
+#| echo: false
+
+# Identificar o país com o maior valor de crescimento urbano, excluindo 0 e NA
+top_country <- Urbanpopulationtransversal %>%
+  filter(!is.na(SP.URB.TOTL) & SP.URB.TOTL > 0) %>%
+  arrange(desc(SP.URB.TOTL)) %>%
+  slice(1) %>%
+  pull(country)
+
+# Exibir o nome do país com maior crescimento urbano
+top_country
+
+# Gerar o gráfico
+Urbanpopulationtransversal %>%
+  filter(!is.na(SP.URB.TOTL) & SP.URB.TOTL > 0) %>%
+  mutate(
+    Brasil = if_else(iso2c == "BR", "Brasil", 
+                     if_else(iso2c == "CN", "China", 
+                             if_else(iso2c == "US", "EUA", "Outros")))
+  ) %>%
+  ggplot(aes(x = reorder(country, -SP.URB.TOTL), y = SP.URB.TOTL, fill = Brasil)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = c("Brasil" = "red", "China" = "green", "EUA" = "green", "Outros" = "black")) +
+  labs(
+    title = "População Urbana em 2023 - Brasil vs Outros Países",
+    x = "País",
+    y = "População Urbana (2023)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank())
+
+```
+
+## Gráfico de Série Temporal (Brasil)
+
+Este gráfico foca **exclusivamente no Brasil**, mostrando a evolução da **população urbana** brasileira ao longo dos anos.
+
+-   **Fase I (1960–1980)**: salto de \~40 mi para \~80 mi — urbanização intensa, modernização industrial e expansão das metrópoles.
+
+<!-- -->
+
+-   **Fase II (1980–2000)**: de \~80 mi para \~150 mi — consolidação das grandes regiões metropolitanas (São Paulo, Rio) e interiorização do crescimento.
+
+<!-- -->
+
+-   **Fase III (2000–2023)**: crescimento mais suave, passando de \~150 mi para \~170 mi — indica saturação de áreas centrais e maior papel das cidades médias.
+
+```{r}
+#| label: grafico-serie-temporal
+#| warning: false
+#| echo: false
+
+Urbanpopulationtemporal %>%
+  ggplot(aes(x = year, y = SP.URB.TOTL)) +
+  geom_line(color = "red", size = 1) +
+  geom_point(color = "red", size = 2) +
+  labs(
+    title = "Evolução da População Urbana no Brasil",
+    x = "Ano",
+    y = "População Urbana"
+  ) +
+  theme_minimal()
+```
