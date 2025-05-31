@@ -1,0 +1,177 @@
+---
+title: "Análise da Balança Comercial"
+author: "Miguel Tkachechen"
+format: html
+editor: visual
+---
+
+## **Descrição da Variável**
+
+A variável analisada neste trabalho é a **Balança Comercial - Mercadorias em Geral - Balanço de Pagamentos - Anual - Saldo**, disponível na base de dados do **Sistema Gerenciador de Séries Temporais (SGS)** do **Banco Central do Brasil**, sob o código **23470**.
+
+O **saldo da balança comercial** corresponde à diferença entre o total de **exportações** e **importações** de mercadorias, refletindo o desempenho do comércio exterior brasileiro. Valores positivos indicam **superávit** (mais exportações que importações), enquanto valores negativos indicam **déficit**.
+
+## **Importância da Análise da Balança Comercial**
+
+A balança comercial é um dos principais indicadores macroeconômicos, sendo fundamental para:
+
+-   **Avaliar a competitividade da economia brasileira** no mercado internacional;
+
+-   **Identificar tendências** no comércio exterior e a dependência de setores específicos, como o agronegócio e a indústria extrativista.
+
+-   **Auxiliar na formulação de políticas públicas**, como estímulos à exportação ou medidas de proteção à indústria nacional;
+
+-   **Monitorar o impacto de choques externos**, como crises financeiras, oscilações cambiais e variações nos preços internacionais de commodities.
+
+### ✅ **1. Boom das Commodities — Anos 2000**
+
+Durante a primeira década dos anos 2000, a balança comercial brasileira apresentou **saldos crescentes**, impulsionados por:
+
+-   O **aumento da demanda global por commodities**, especialmente por parte da **China**, principal parceiro comercial do Brasil.
+
+-   A valorização de produtos como **soja, minério de ferro e petróleo**.
+
+-   A adoção de políticas de incentivo às exportações e à diversificação da pauta exportadora.
+
+    Este período foi caracterizado por **superávits robustos**, fundamentais para a estabilidade macroeconômica e o acúmulo de reservas internacionais.
+
+### ✅ **2. Impacto da Crise de 2008**
+
+A partir de 2008, a **Crise Financeira Internacional** afetou significativamente o comércio exterior brasileiro:
+
+-   Houve uma **redução abrupta na demanda global**, impactando negativamente as exportações.
+
+-   O **saldo da balança comercial diminuiu**, embora o Brasil tenha mantido superávits, devido à retração também das importações.
+
+-   A volatilidade cambial e o aumento do risco internacional afetaram o fluxo de comércio e investimentos.
+
+Este momento marca uma **queda expressiva** na trajetória da balança comercial, destacada no gráfico.
+
+### ✅ **3. Pandemia de COVID-19 — A partir de 2020**
+
+O surgimento da pandemia de **COVID-19**, em 2020, trouxe novos desafios:
+
+-   A desaceleração da atividade econômica global reduziu o volume de comércio internacional.
+
+-   As **cadeias de suprimento foram afetadas**, alterando fluxos logísticos e preços.
+
+-   Entretanto, o Brasil manteve exportações relevantes em setores como **agronegócio e mineração**, devido à demanda estável por alimentos e matérias-primas.
+
+O gráfico evidencia essa nova fase de **turbulência econômica**, com variações significativas no saldo comercial.
+
+## ✅ **Observações sobre o Gráfico Animado**
+
+O gráfico animado foi produzido com a função **`transition_reveal()`** da biblioteca **`gganimate`**, permitindo visualizar a **evolução temporal** do saldo da balança comercial.
+
+Anotações estratégicas destacam momentos críticos:
+
+-   **Boom das commodities (anos 2000)**, com crescimento expressivo;
+
+-   **Crise de 2008**, com queda acentuada;
+
+-   **Pandemia de COVID-19**, evidenciando impactos recentes.
+
+O uso deste tipo de visualização facilita a **compreensão didática** dos movimentos históricos e reforça a importância de uma análise dinâmica dos dados econômicos.
+
+## ✅ **Conclusão**
+
+A evolução da balança comercial brasileira evidencia como o país é sensível aos ciclos econômicos globais, destacando períodos de forte superávit e momentos de retração. A análise reforça a importância de políticas que estimulem a diversificação das exportações e a resiliência frente a choques externos.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+if (!requireNamespace("GetBCBData")) install.packages("GetBCBData")
+if (!requireNamespace("tidyverse")) install.packages("tidyverse")
+if (!requireNamespace("gganimate")) install.packages("gganimate")
+if (!requireNamespace("gifski")) install.packages("gifski")
+if (!requireNamespace("transformr")) install.packages("transformr")
+if (!requireNamespace("png")) install.packages("png")
+if (!requireNamespace("ragg")) install.packages("ragg")
+
+library(GetBCBData)
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(transformr)
+library(png)
+library(ragg)
+df.bcb <- gbcbd_get_series(
+  id = c(balanca = 23470),
+  first.date = "2000-01-01",
+  last.date = Sys.Date(),
+  format.data = "long"
+)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(gganimate)
+library(lubridate)
+
+pico_data <- df.bcb$ref.date[which.max(df.bcb$value)]
+pico_valor <- max(df.bcb$value, na.rm = TRUE)
+
+grafico <- ggplot(df.bcb, aes(x = ref.date, y = value, group = 1)) +
+  geom_line(color = "#2c3e50", linewidth = 1.2) +
+  geom_point(color = "#e74c3c", size = 3) +
+  labs(
+    title = "Balança Comercial Brasileira - Evolução Anual",
+    subtitle = "Saldo da balança comercial (exportações - importações)",
+    x = NULL,
+    y = "Saldo (US$ milhões)"
+  ) +
+
+  # Texto verde: desce mais um pouco, mas ainda acima da linha
+  annotate("text", 
+           x = as.Date("2005-01-01"),  
+           y = pico_valor * 0.85,  # desceu mais para ficar bem em cima da linha
+           label = "Boom das commodities\nanos 2000", hjust = 0.5, vjust = 0,
+           size = 7, color = "darkgreen") +  
+  
+  # Texto azul (mantém)
+  annotate("text", x = as.Date("2009-01-01"), 
+           y = min(df.bcb$value, na.rm = TRUE) + 7000,
+           label = "Impacto da\nCrise de 2008", hjust = 0, vjust = 1,
+           size = 7, color = "blue") +
+
+  # Texto vermelho da pandemia, posição mantida
+  annotate("text", 
+           x = as.Date("2015-06-01"),  
+           y = pico_valor * 1.07,    
+           label = "Pandemia COVID-19\na partir de 2020", hjust = 0, vjust = 1,
+           size = 7, color = "red") +
+
+  # Seta um pouco mais para baixo (reduzi de 1.03 para 1.00)
+  geom_segment(aes(x = as.Date("2015-06-01"), y = pico_valor * 1.00, 
+                   xend = pico_data, yend = pico_valor * 1.00),
+               arrow = arrow(length = unit(0.03, "npc")), color = "red", size = 1) +
+
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text = element_text(size = 12),
+    axis.text.x = element_text(angle = 35, hjust = 1)
+  ) +
+  transition_reveal(ref.date)
+
+anim <- animate(
+  grafico,
+  width = 1920,
+  height = 1080,
+  units = "px",
+  res = 150,
+  duration = 10,
+  renderer = gifski_renderer(),
+  dev = "ragg_png"
+)
+
+anim_save("balanca_comercial_animada.gif", anim)
+
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+echo = FALSE
+knitr::include_graphics("balanca_comercial_animada.gif")
+```
