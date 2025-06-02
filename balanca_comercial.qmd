@@ -1,6 +1,6 @@
 ---
 title: "Análise da Balança Comercial"
-autor: "Miguel Tkachechen"
+author: "Miguel Tkachechen"
 format: html
 editor: visual
 ---
